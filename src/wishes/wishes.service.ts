@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -129,6 +130,17 @@ export class WishesService {
       relations: { wishes: true },
       where: { id: userId },
     });
+
+    const isUserHasWish = user.wishes.some(
+      (userWish) =>
+        userWish.name === wish.name &&
+        userWish.image === wish.image &&
+        userWish.link === wish.link &&
+        userWish.price === wish.price,
+    );
+    if (isUserHasWish) {
+      throw new ConflictException('У Вас уже есть этот подарок');
+    }
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
